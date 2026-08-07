@@ -1,0 +1,919 @@
+PROJECT TITLE:
+EnterpriseGPT — Secure Enterprise Retrieval Augmented Generation (RAG) AI Assistant
+
+PROJECT OBJECTIVE:
+Build a production-level private ChatGPT system for companies where employees can upload internal documents and ask questions. The AI assistant should answer using company data with accurate citations, document references, and role-based access control.
+
+The project must demonstrate:
+- Large Language Models (LLM)
+- Retrieval Augmented Generation (RAG)
+- Vector Databases
+- Backend Engineering
+- Authentication
+- Cloud Deployment
+- AI System Design
+- Enterprise Security
+
+
+==================================================
+PROJECT DEVELOPMENT PLAN
+DIVIDED INTO 5 COMPLETE PHASES
+==================================================
+
+
+PHASE 1:
+FOUNDATION + DOCUMENT INTELLIGENCE PIPELINE
+
+Goal:
+Build the complete document processing pipeline that converts company documents into searchable AI knowledge.
+
+Features:
+
+1. Backend Setup
+
+Create FastAPI backend with:
+
+- Python
+- FastAPI
+- Async SQLAlchemy
+- PostgreSQL
+- Alembic migrations
+- Pydantic schemas
+
+
+Backend structure:
+
+backend/
+
+    app/
+        api/
+        models/
+        schemas/
+        services/
+        database/
+        core/
+        utils/
+
+
+2. Document Upload System
+
+Users can upload:
+
+- PDF
+- DOCX
+- TXT
+- CSV
+
+
+Implement:
+
+- File validation
+- File storage
+- Metadata extraction
+- Document tracking
+
+
+Database:
+
+Documents Table:
+
+- id
+- filename
+- file_type
+- uploaded_by
+- upload_time
+- status
+
+
+3. Document Processing Pipeline
+
+
+Flow:
+
+Upload File
+
+↓
+
+Extract Text
+
+↓
+
+Clean Text
+
+↓
+
+Split Into Chunks
+
+↓
+
+Generate Embeddings
+
+↓
+
+Store Embeddings
+
+
+Implement:
+
+PDF extraction:
+- PyMuPDF
+
+DOCX extraction:
+- python-docx
+
+Text splitting:
+- RecursiveCharacterTextSplitter
+
+
+4. Embedding System
+
+
+Use:
+
+- Sentence Transformers
+
+
+Model:
+
+all-MiniLM-L6-v2
+
+
+Generate vector embeddings for every chunk.
+
+
+
+5. Vector Database
+
+
+Setup:
+
+Qdrant
+
+
+Store:
+
+- chunk text
+- document id
+- metadata
+- embeddings
+
+
+Deliverable:
+
+A working backend where:
+
+User uploads PDF
+
+↓
+
+System processes it
+
+↓
+
+Document becomes searchable
+
+
+
+==================================================
+
+
+PHASE 2:
+RAG PIPELINE + AI QUESTION ANSWERING
+
+
+Goal:
+
+Create ChatGPT-like answering system using company documents.
+
+
+Features:
+
+
+1. Semantic Search
+
+
+User Question:
+
+"What is employee leave policy?"
+
+
+Convert question:
+
+Text
+
+↓
+
+Embedding
+
+↓
+
+Vector Search
+
+↓
+
+Retrieve Relevant Chunks
+
+
+
+2. RAG Architecture
+
+
+Implement:
+
+
+Question
+
+↓
+
+Query Embedding
+
+↓
+
+Qdrant Search
+
+↓
+
+Relevant Documents
+
+↓
+
+Prompt Construction
+
+↓
+
+LLM
+
+↓
+
+Final Answer
+
+
+
+3. LLM Integration
+
+
+Support:
+
+Local Models:
+
+- Llama 3
+- Mistral
+- Qwen
+
+
+Cloud:
+
+- OpenAI API
+- Gemini API
+
+
+Create abstraction:
+
+
+LLM Service:
+
+generate_answer()
+
+
+
+
+4. Prompt Engineering
+
+
+Create system prompt:
+
+"You are an enterprise AI assistant.
+Answer only using provided context.
+If information is unavailable, say you don't know.
+Always provide document citations."
+
+
+5. Citation System
+
+
+Every answer should include:
+
+
+Answer:
+
+"The leave policy allows 20 annual leaves."
+
+
+Sources:
+
+Employee_Handbook.pdf
+
+Page 15
+
+
+Deliverable:
+
+A working private ChatGPT system.
+
+
+
+==================================================
+
+
+PHASE 3:
+FRONTEND + USER MANAGEMENT + ENTERPRISE FEATURES
+
+
+Goal:
+
+Build professional enterprise UI.
+
+
+Frontend:
+
+Technology:
+
+- Next.js
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+
+
+Pages:
+
+
+1. Authentication
+
+Pages:
+
+- Login
+- Register
+- Forgot Password
+
+
+Implement:
+
+JWT Authentication
+
+
+Roles:
+
+ADMIN
+
+EMPLOYEE
+
+
+
+2. Dashboard
+
+
+Features:
+
+Show:
+
+- Uploaded documents
+- Recent questions
+- Usage statistics
+
+
+
+3. Chat Interface
+
+
+Build ChatGPT-like UI:
+
+
+Features:
+
+- Streaming responses
+- Conversation history
+- Markdown rendering
+- Code highlighting
+- Source citations
+
+
+
+4. Document Management
+
+
+Admin can:
+
+- Upload documents
+- Delete documents
+- View processing status
+
+
+
+Employee can:
+
+- Search documents
+- Ask questions
+
+
+
+5. Conversation Memory
+
+
+Store:
+
+- Previous messages
+- User conversations
+
+
+Database:
+
+Chats Table:
+
+- id
+- user_id
+- question
+- answer
+- timestamp
+
+
+
+Deliverable:
+
+Complete enterprise AI application.
+
+
+
+==================================================
+
+
+PHASE 4:
+ADVANCED AI FEATURES + PRODUCTION OPTIMIZATION
+
+
+Goal:
+
+Convert project from basic RAG into advanced enterprise AI.
+
+
+Implement:
+
+
+1. Hybrid Search
+
+
+Combine:
+
+
+Vector Search
+
++
+
+Keyword Search
+
+
+Using:
+
+- Qdrant filtering
+- BM25
+
+
+
+2. Multi-Agent Architecture
+
+
+Create:
+
+
+Router Agent
+
+
+          |
+-----------------------
+|          |          |
+
+HR Agent  Legal Agent Technical Agent
+
+
+
+Each agent specializes in different documents.
+
+
+
+3. Document Permission System
+
+
+Example:
+
+
+HR Documents:
+
+Only HR department
+
+
+Engineering Documents:
+
+Only Engineers
+
+
+Implement:
+
+
+Document ACL:
+
+
+document_id
+
+allowed_roles
+
+allowed_users
+
+
+
+4. RAG Evaluation
+
+
+Measure:
+
+
+- Retrieval accuracy
+- Answer quality
+- Hallucination
+
+
+Implement:
+
+RAGAS evaluation
+
+
+Metrics:
+
+- Faithfulness
+- Answer relevance
+- Context precision
+
+
+
+5. AI Analytics Dashboard
+
+
+Track:
+
+
+- Number of questions
+- Most searched topics
+- Failed queries
+- User activity
+
+
+
+Deliverable:
+
+Enterprise-grade AI assistant.
+
+
+
+==================================================
+
+
+PHASE 5:
+DEPLOYMENT + SYSTEM DESIGN + RESUME LEVEL POLISH
+
+
+Goal:
+
+Deploy as a real SaaS product.
+
+
+Implement:
+
+
+1. Dockerization
+
+
+Create:
+
+Dockerfile
+
+docker-compose.yml
+
+
+Containers:
+
+
+Frontend
+
+Backend
+
+PostgreSQL
+
+Redis
+
+Qdrant
+
+
+
+2. Cloud Deployment
+
+
+Deploy:
+
+
+Backend:
+
+AWS EC2 / Google Cloud Run
+
+
+Frontend:
+
+Vercel
+
+
+Database:
+
+Managed PostgreSQL
+
+
+Vector DB:
+
+Qdrant Cloud
+
+
+
+3. Security
+
+
+Implement:
+
+
+- HTTPS
+- JWT refresh tokens
+- Rate limiting
+- Input validation
+- File scanning
+- API security
+
+
+
+4. Monitoring
+
+
+Add:
+
+
+- Logging
+- Error tracking
+- Performance metrics
+
+
+
+5. Final Documentation
+
+
+Create:
+
+
+README.md
+
+
+Include:
+
+- Architecture diagram
+- Features
+- Installation
+- API documentation
+- Screenshots
+- Demo video
+
+
+
+6. Resume Optimization
+
+
+Final Resume Entry:
+
+
+EnterpriseGPT — Secure Enterprise RAG AI Assistant
+
+Built a production-ready private ChatGPT platform using Retrieval Augmented Generation architecture. Implemented document ingestion pipelines, semantic search using vector embeddings, Qdrant vector database, FastAPI backend, Next.js frontend, JWT authentication, role-based access control, and citation-based LLM responses.
+
+
+==================================================
+FINAL TECH STACK
+==================================================
+
+
+Frontend:
+
+- Next.js
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+
+
+Backend:
+
+- FastAPI
+- Python
+- Async SQLAlchemy
+- PostgreSQL
+- Alembic
+
+
+AI:
+
+- LangChain/LlamaIndex
+- HuggingFace Transformers
+- Sentence Transformers
+- LLM APIs
+
+
+Storage:
+
+- PostgreSQL
+- Qdrant
+- Redis
+
+
+Deployment:
+
+- Docker
+- AWS/GCP
+- Vercel
+
+
+==================================================
+MASTER DEVELOPMENT PROMPT
+==================================================
+
+
+You are a senior AI engineer and software architect.
+
+Your task is to build a complete production-level Enterprise RAG AI Assistant named "EnterpriseGPT".
+
+The application should work like a private ChatGPT for companies.
+
+Follow professional software engineering practices.
+
+Requirements:
+
+1. Build a scalable full-stack architecture.
+
+2. Backend:
+- Use FastAPI.
+- Use async Python.
+- Use PostgreSQL with SQLAlchemy.
+- Use Alembic migrations.
+- Create clean modular architecture.
+
+3. Authentication:
+- Implement JWT authentication.
+- Add user registration and login.
+- Add role-based access control.
+
+Roles:
+- Admin
+- Employee
+
+
+4. Document System:
+Implement document upload supporting:
+
+- PDF
+- DOCX
+- TXT
+- CSV
+
+
+Create complete document processing pipeline:
+
+Upload document
+
+↓
+
+Extract text
+
+↓
+
+Clean text
+
+↓
+
+Split into chunks
+
+↓
+
+Generate embeddings
+
+↓
+
+Store vectors in Qdrant
+
+
+
+5. RAG System:
+
+Implement Retrieval Augmented Generation pipeline.
+
+Flow:
+
+User Question
+
+↓
+
+Embedding Generation
+
+↓
+
+Vector Search
+
+↓
+
+Retrieve Relevant Context
+
+↓
+
+LLM Prompt
+
+↓
+
+Generate Answer
+
+↓
+
+Return Citation
+
+
+6. AI Model Layer:
+
+Create modular LLM service supporting:
+
+- OpenAI
+- Gemini
+- Local Llama models
+
+
+7. Frontend:
+
+Build modern ChatGPT-style interface using:
+
+- Next.js
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+
+
+Include:
+
+- Authentication pages
+- Dashboard
+- Chat interface
+- Document management
+- User profile
+
+
+8. Advanced Features:
+
+Implement:
+
+- Conversation memory
+- Document permissions
+- Hybrid search
+- Multi-agent routing
+- RAG evaluation
+- Analytics dashboard
+
+
+9. Deployment:
+
+Create:
+
+- Docker setup
+- docker-compose
+- Production environment configuration
+
+
+10. Code Quality:
+
+Follow:
+
+- Clean architecture
+- SOLID principles
+- Error handling
+- Logging
+- Environment variables
+- API documentation
+
+
+11. Documentation:
+
+Generate:
+
+- README
+- Architecture explanation
+- Setup instructions
+- API documentation
+
+
+Build this project phase by phase.
+
+After completing each phase:
+
+- Explain the architecture.
+- Provide folder structure.
+- Provide complete code.
+- Explain implementation decisions.
+- Test the functionality before moving to the next phase.
+
+
+Start with PHASE 1:
+Foundation and Document Intelligence Pipeline.

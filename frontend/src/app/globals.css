@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: theme("colors.paper.DEFAULT");
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d4d2ce transparent;
+}
+
+::selection {
+  background-color: theme("colors.brand.200");
+}
+
+.markdown-body p {
+  margin-bottom: 0.6rem;
+  line-height: 1.6;
+}
+.markdown-body p:last-child {
+  margin-bottom: 0;
+}
+.markdown-body ul,
+.markdown-body ol {
+  margin: 0.25rem 0 0.6rem 1.25rem;
+}
+.markdown-body ul {
+  list-style: disc;
+}
+.markdown-body ol {
+  list-style: decimal;
+}
+.markdown-body pre {
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  margin: 0.6rem 0;
+}
+.markdown-body code:not(pre code) {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.35rem;
+  font-size: 0.85em;
+}
+
+/* Subtle gradient ring used once, on the composer focus state — the page's
+   one nod to Gemini's colorful accents, kept quiet everywhere else. */
+.composer-ring:focus-within {
+  box-shadow: theme("boxShadow.composer-focus");
+}
