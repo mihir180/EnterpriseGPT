@@ -11,6 +11,7 @@ Pipeline:
     -> citations + persisted ChatQuery row (for analytics)
 """
 import logging
+import re
 import uuid
 from dataclasses import dataclass
 
@@ -30,6 +31,13 @@ VECTOR_CANDIDATE_K = 20
 BM25_CANDIDATE_K = 20
 FINAL_TOP_K = 6
 RRF_K = 60  # standard RRF smoothing constant
+
+# Citation display settings. The LLM still receives up to FINAL_TOP_K chunks as
+# context, but only chunks that actually support the generated answer are shown
+# as citations (measured by how many of the answer's words appear in the chunk).
+MAX_CITATIONS = 3
+CITATION_MIN_COVERAGE = 0.45     # a cited chunk must cover >= 45% of the answer's key words
+CITATION_RELATIVE_COVERAGE = 0.75  # ...and >= 75% of the best chunk's coverage
 
 
 @dataclass
@@ -128,6 +136,70 @@ async def _hybrid_search(
     return results, retrieval_mode
 
 
+_STOPWORDS = {
+    "the", "and", "for", "are", "was", "were", "with", "that", "this", "these", "those",
+    "from", "have", "has", "had", "not", "but", "you", "your", "our", "their", "its",
+    "can", "may", "must", "will", "would", "should", "could", "any", "all", "each",
+    "per", "than", "then", "them", "they", "who", "what", "when", "where", "which",
+    "how", "why", "also", "into", "onto", "such", "only", "both", "been", "being",
+    "according", "provided", "based", "context", "document", "documents", "guidelines",
+    "policy", "there", "here", "about", "over", "under", "after", "before", "does", "did",
+}
+
+
+def _key_terms(text: str) -> set[str]:
+    """Lower-cased content words, lightly stemmed, with stopwords removed."""
+    terms: set[str] = set()
+    for tok in re.findall(r"[a-z0-9]+", text.lower()):
+        if tok in _STOPWORDS:
+            continue
+        if not (len(tok) >= 3 or (tok.isdigit() and len(tok) >= 2)):
+            continue
+        if len(tok) > 4 and tok.endswith("s"):
+            tok = tok[:-1]
+        terms.add(tok)
+    return terms
+
+
+def _select_citations(chunks: list[RetrievedChunk], answer: str) -> list[RetrievedChunk]:
+    """Pick the chunks that actually support the answer.
+
+    Each retrieved chunk is scored by how many of the answer's key words it
+    contains. We always keep the best chunk, keep others only if they cover a
+    similar share of the answer, show each (file, page) once, and cap the total
+    at MAX_CITATIONS. If the answer has no usable key words, fall back to the
+    search ranking.
+    """
+    if not chunks:
+        return []
+    answer_terms = _key_terms(answer)
+    if not answer_terms:
+        return chunks[:1]
+
+    scored = []
+    for c in chunks:
+        coverage = len(answer_terms & _key_terms(c.content)) / len(answer_terms)
+        scored.append((coverage, c.score, c))
+    scored.sort(key=lambda t: (t[0], t[1]), reverse=True)
+    best = scored[0][0]
+
+    selected: list[RetrievedChunk] = []
+    seen: set[tuple[str, int | None]] = set()
+    for coverage, _, c in scored:
+        if selected and (
+            coverage < CITATION_MIN_COVERAGE or coverage < best * CITATION_RELATIVE_COVERAGE
+        ):
+            break
+        key = (c.filename, c.page_number)
+        if key in seen:
+            continue
+        seen.add(key)
+        selected.append(c)
+        if len(selected) >= MAX_CITATIONS:
+            break
+    return selected
+
+
 def _build_context(chunks: list[RetrievedChunk]) -> str:
     blocks = []
     for c in chunks:
@@ -190,9 +262,11 @@ async def answer_question(
             "Please check with the relevant team or try rephrasing your question."
         )
 
+    citations = _select_citations(chunks, answer) if context_used else []
+
     result = RagResult(
         answer=answer,
-        sources=chunks,
+        sources=citations,
         context_used=context_used,
         department=department,
         agent_used=agent_service.agent_name(department),
@@ -212,7 +286,7 @@ async def answer_question(
                 "page_number": c.page_number,
                 "score": c.score,
             }
-            for c in chunks
+            for c in citations
         ],
         context_used=context_used,
         department=department.value,
